@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-contract MultipleProjectsFund {
+contract ProjectsFundraising {
   enum Status { Open, Paused, Closed }
     
   struct AddressSet {
@@ -119,9 +119,14 @@ contract MultipleProjectsFund {
     emit ProjectFunded(projectIndex, msg.sender, msg.value);
 
     if (project.balance == project.goal) {
+      project.status = Status.Closed; 
       project.owner.transfer(project.goal);
       emit ProjectClosed(projectIndex);
     }
+  }
+
+  function getProject(uint256 projectIndex) projectExists(projectIndex) public view returns (Project memory) {
+    return projects[projectIndex];
   }
   
   function getOwner(uint256 projectIndex) projectExists(projectIndex) public view returns (address) {
@@ -130,6 +135,13 @@ contract MultipleProjectsFund {
   
   function getTotalFunders(uint256 projectIndex) projectExists(projectIndex) public view returns (uint256) {
     return funders[projectIndex].values.length;
+  }
+  
+  function getStatus(uint256 projectIndex) projectExists(projectIndex) public view returns (string memory) {
+    if (projects[projectIndex].status == Status.Open) return "The project is open";
+    if (projects[projectIndex].status == Status.Closed) return "The project is closed";
+    if (projects[projectIndex].status == Status.Paused) return "The project is paused";
+    return "";
   }
 
   function isClosed(uint256 projectIndex) projectExists(projectIndex) public view returns (bool) {
@@ -151,7 +163,6 @@ contract MultipleProjectsFund {
   function getMyContribution(uint256 projectIndex) projectExists(projectIndex) notOwner(projectIndex) public view returns (uint256) {
     return funds[projectIndex][msg.sender];
   }
-  
   
   function pauseProject(uint256 projectIndex) projectExists(projectIndex) onlyOwner(projectIndex) public {
     require(

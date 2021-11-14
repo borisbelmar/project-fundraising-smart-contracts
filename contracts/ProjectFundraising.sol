@@ -2,7 +2,8 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-contract SingleProjectFund {
+contract ProjectFundraising {
+  enum Status { Open, Paused, Closed }
     
   struct AddressSet {
     address payable[] values;
@@ -16,7 +17,7 @@ contract SingleProjectFund {
   }
   
   Project project;
-  bool isOpen;
+  Status status;
   uint256 balance;
   
   mapping(address => uint256) funds;
@@ -24,7 +25,7 @@ contract SingleProjectFund {
   
   constructor(string memory _name, uint256 _goal) {
     project = Project(_name, _goal, payable(msg.sender));
-    isOpen = true;
+    status = Status.Open;
     balance = 0;
   }
   
@@ -63,8 +64,12 @@ contract SingleProjectFund {
 
   function fundProject() payable public notOwner {
     require(
-      isOpen,
-      "Project is not open for fund raising"
+      status != Status.Paused,
+      "Project is paused for fund raising. Stay tuned!"
+    );
+    require(
+      status != Status.Closed,
+      "Project is closed for fund raising"
     );
     require(
       uint(msg.value) > 0,
@@ -83,10 +88,14 @@ contract SingleProjectFund {
     balance += uint(msg.value);
     
     if (balance == project.goal) {
-      isOpen = false;
+      status = Status.Closed;
       project.owner.transfer(project.goal);
       emit closed(msg.sender, msg.value);
     }
+  }
+
+  function getProject() public view returns (Project memory) {
+    return project;
   }
   
   function getOwner() public view returns (address) {
@@ -96,9 +105,16 @@ contract SingleProjectFund {
   function totalFunders() public view returns (uint256) {
     return funders.values.length;
   }
+  
+  function getStatus() public view returns (string memory) {
+    if (status == Status.Open) return "The project is open";
+    if (status == Status.Closed) return "The project is closed";
+    if (status == Status.Paused) return "The project is paused";
+    return "";
+  }
 
   function isClosed() public view returns (bool) {
-    return !isOpen;
+    return status == Status.Closed;
   }
 
   function getRemaining() public view returns (uint256) {
@@ -117,8 +133,28 @@ contract SingleProjectFund {
     return funds[msg.sender];
   }
 
+  function pauseProject() onlyOwner public {
+    require(
+      status == Status.Open,
+      "This project is not open and cant be paused"
+    );
+    status = Status.Paused;
+  }
+  
+  function resumeProject() onlyOwner public {
+    require(
+      status == Status.Paused,
+      "This project is not paused and cant be resumed"
+    );
+    status = Status.Open;
+  }
+
   function closeProject() public onlyOwner {
-    isOpen = false;
+    require(
+      status != Status.Closed,
+      "This project is already closed"
+    );
+    status = Status.Closed;
     emit closed(msg.sender, 0);
     
     for(uint8 i; i < funders.values.length; i++) {
