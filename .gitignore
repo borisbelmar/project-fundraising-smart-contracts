@@ -1,1 +1,4 @@
-artifacts
+artifacts/
+build/
+.env
+node_modules/

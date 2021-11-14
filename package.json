@@ -1,0 +1,27 @@
+{
+  "name": "projects-fundraising",
+  "version": "1.0.0",
+  "description": "Smart contracts for project fundraising dApp written in solidity for Ethereum compatible blockchains.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borisbelmar/project-fundraising-smart-contracts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/borisbelmar/project-fundraising-smart-contracts/issues"
+  },
+  "homepage": "https://github.com/borisbelmar/project-fundraising-smart-contracts#readme",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.6.0",
+    "dotenv": "^10.0.0"
+  }
+}
